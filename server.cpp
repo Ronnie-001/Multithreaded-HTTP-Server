@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <cstring>
@@ -11,7 +12,8 @@
 #define BACKLOG 10
 
 int main()
-{ int status;
+{ 
+    int status;
     // Specifies the criteria for the returned socket addresses.
     struct addrinfo hints; 
     // Collect the result here.
@@ -30,10 +32,22 @@ int main()
         std::cout << gai_strerror(status);
         exit(1);
     }
+    
+    // Loop through all of the found server addresses.
+    for (addrinfo* p = servinfo; p != NULL; p = p->ai_next) {
+        
+        // Creation of a socket
+        int sockfd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
 
-    // Creation of a socket
-    int sockfd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
-    int bindfd = bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen);
+        if (sockfd == -1) {
+            perror("socket");
+            exit(0);
+        }
+        
+        int bindfd = bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen);
+
+
+    } 
 
     // int connfd = connect(bindfd, servinfo->ai_addr, servinfo->ai_addrlen);
 
