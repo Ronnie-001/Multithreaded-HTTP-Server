@@ -8,9 +8,11 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <unistd.h>
 
 #define MY_PORT "3490"
 #define BACKLOG 10
+
 
 int main()
 { 
@@ -90,6 +92,7 @@ int main()
         std::string conn_ip;
         inet_ntop(AF_INET, &recieved_connection, conn_ip.data(), sizeof(conn_ip));
         std::cout << "server: Recived connection from" << conn_ip << '\n'; 
-
+        
+        close(new_conn_fd);
     }
 }
