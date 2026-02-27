@@ -3,8 +3,10 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstring>
+#include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 
 #define MY_PORT "3490"
@@ -18,9 +20,6 @@ int main()
     // Collect the result here, and have a pointer to servinfo
     struct addrinfo* servinfo;
     struct addrinfo* ptr;
-
-    // Store the incoming connections
-    struct sockaddr pending_connections;
 
     int bindfd, sockfd;
 
@@ -72,8 +71,25 @@ int main()
         exit(1);
     } 
     
-    std::cout << "Waiting for new connections"; 
+    std::cout << "Waiting for new connections...\n"; 
+    
+    bool server_running = true;
+    // Store the recieved connection
+    struct sockaddr recieved_connection;
 
+    while (server_running) {
+        socklen_t connection_size = sizeof(recieved_connection);
+        int new_conn_fd = accept(sockfd, &recieved_connection, &connection_size);
+        
+        if (new_conn_fd == -1) {
+            perror("accept: error accepting a new connection");
+            continue;
+        }
+        
+        // Get the name of the IP address that is connecting
+        std::string conn_ip;
+        inet_ntop(AF_INET, &recieved_connection, conn_ip.data(), sizeof(conn_ip));
+        std::cout << "server: Recived connection from" << conn_ip << '\n'; 
 
-    return 0;
+    }
 }
