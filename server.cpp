@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstring>
+#include <iterator>
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -13,7 +14,6 @@
 #define MY_PORT "3490"
 #define BACKLOG 10
 
-
 int main()
 { 
     int status;
@@ -23,7 +23,7 @@ int main()
     struct addrinfo* servinfo;
     struct addrinfo* ptr;
 
-    int bindfd, sockfd;
+    int bind_res, sockfd;
 
     // Make sure that the struct is empty before filling it in with data
     std::memset(&hints, 0, sizeof(hints));
@@ -44,14 +44,14 @@ int main()
         sockfd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
 
         if (sockfd == -1) {
-            perror("socket error");
+            perror("server: socket error");
             continue;
         }
-        
-        bindfd = bind(sockfd, ptr->ai_addr, ptr->ai_addrlen);
 
-        if (bindfd == -1) {
-            perror("bind error");
+        bind_res = bind(sockfd, ptr->ai_addr, ptr->ai_addrlen);
+
+        if (bind_res == -1) {
+            perror("server: bind error");
             continue;
         }
         
@@ -62,18 +62,18 @@ int main()
 
     if (ptr == NULL) {
         // Flush any pending output and exit
-        std::cerr << "No avaliable connections"; 
+        std::cerr << "server: No avaliable connections, closing server."; 
         exit(1);
     }
 
-    int listenfd = listen(bindfd, BACKLOG);
+    int listenfd = listen(sockfd, BACKLOG);
 
     if (listenfd == -1) {
-        perror("listen error");
+        perror("server: listen error");
         exit(1);
     } 
     
-    std::cout << "Waiting for new connections...\n"; 
+    std::cout << "server: Waiting for new connections...\n"; 
     
     bool server_running = true;
     // Store the recieved connection
@@ -87,11 +87,29 @@ int main()
             perror("accept: error accepting a new connection");
             continue;
         }
-        
+
         // Get the name of the IP address that is connecting
-        std::string conn_ip;
-        inet_ntop(AF_INET, &recieved_connection, conn_ip.data(), sizeof(conn_ip));
-        std::cout << "server: Recived connection from" << conn_ip << '\n'; 
+        char conn_ip[INET_ADDRSTRLEN];
+        socklen_t ip_size = sizeof(conn_ip);
+        
+        struct sockaddr_in* ipv4_addr = (struct sockaddr_in*)&recieved_connection;
+
+        inet_ntop(AF_INET, &ipv4_addr->sin_addr, conn_ip, ip_size);
+        std::cout << "server: Recieved connection from: " << conn_ip << '\n'; 
+ 
+        
+        //  Create a child process
+        pid_t pid = fork();
+        if (pid == 0) {
+            close(sockfd);
+            
+            std::string msg = "Hello from the child process!";
+
+            send(new_conn_fd, msg.data(), msg.size(), 0);
+            close(new_conn_fd);
+
+            exit(0);
+        }
         
         close(new_conn_fd);
     }
