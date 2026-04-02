@@ -1,5 +1,6 @@
 {
-  description = "C++ Socket Programming Environment";
+  description = "C++ Multithreaded HTTP Server project.";
+    
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
   outputs = { self, nixpkgs }: let
@@ -16,6 +17,12 @@
 
       # mkShell automatically pulls in the C/C++ standard libraries (stdenv)
       # so <iostream> and <sys/socket.h> will instantly become available!
+    
+    # This runs every time you enter the shell
+    shellHook = ''
+      echo "C++ Dev Environment Loaded!"
+      echo "Node version: $(gcc --version)"
+      '';
     };
   };
 }

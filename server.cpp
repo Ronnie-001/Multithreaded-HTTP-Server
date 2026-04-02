@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstring>
-#include <iterator>
+#include <mutex>
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -13,6 +13,9 @@
 
 #define MY_PORT "3490"
 #define BACKLOG 10
+
+// Define the mutex here
+std::mutex mtx;
 
 int main()
 { 
@@ -37,7 +40,7 @@ int main()
         std::cout << gai_strerror(status);
         exit(1);
     }
-    
+
     // Loop through all of the found server addresses.
     for (ptr = servinfo; ptr != NULL; ptr = ptr->ai_next) {
         
@@ -57,7 +60,7 @@ int main()
         
         break;
     } 
-    
+
     freeaddrinfo(servinfo);
 
     if (ptr == NULL) {
@@ -71,10 +74,10 @@ int main()
     if (listenfd == -1) {
         perror("server: listen error");
         exit(1);
-    } 
+    }   
     
     std::cout << "server: Waiting for new connections...\n"; 
-    
+
     bool server_running = true;
     // Store the recieved connection
     struct sockaddr recieved_connection;
@@ -96,7 +99,9 @@ int main()
 
         inet_ntop(AF_INET, &ipv4_addr->sin_addr, conn_ip, ip_size);
         std::cout << "server: Recieved connection from: " << conn_ip << '\n'; 
- 
+
+        // Create a buffer to read the data into
+        char buffer[1024];
         
         //  Create a child process
         pid_t pid = fork();
