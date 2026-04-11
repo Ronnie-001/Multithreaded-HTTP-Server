@@ -83,19 +83,19 @@ void Server::listenForConnections()
     _server_running = true;
 
     while (_server_running) {
-        socklen_t connection_size = sizeof(*_received_connection);
+        socklen_t connection_size = sizeof(_received_connection);
         _conn_fd = accept(_sock_fd, (sockaddr*)&_received_connection, &connection_size);
         
         if (_conn_fd == -1) {
             std::cout << "[LOGS] accept: failure extracting connection request. File descriptor: " << _conn_fd;
             continue;
         }
-        
+
         // Read in the incoming request data.
         char data[INET6_ADDRSTRLEN];
         socklen_t request_size = sizeof(data);
 
-        inet_ntop(_received_connection->ss_family, getAddressFamily(_received_connection), data, request_size);
+        inet_ntop(_received_connection.ss_family, getAddressFamily(&_received_connection), data, request_size);
         std::cout << "[SERVER] Data recieved: " << data << '\n';
 
         // buffer to read the data into.
@@ -107,11 +107,8 @@ void* Server::getAddressFamily(const sockaddr_storage* recieved_connection)
 {
     // Check for IPv4.
     if (recieved_connection->ss_family == AF_INET) {
-        struct sockaddr_in* s = (struct sockaddr_in*)&recieved_connection;
-        return &(s->sin_addr);
+        return &(((struct sockaddr_in*)recieved_connection))->sin_addr;
     }
     
-    // IPv6.
-    struct sockaddr_in6* s = (struct sockaddr_in6*)&recieved_connection;
-    return &(s->sin6_addr);
+    return &(((struct sockaddr_in6*)recieved_connection))->sin6_addr;
 }

@@ -19,7 +19,7 @@ private:
     struct addrinfo* _ptr;
 
     bool _server_running;
-    struct sockaddr_storage* _received_connection; 
+    struct sockaddr_storage _received_connection; 
 
 public:
     // Constructor
