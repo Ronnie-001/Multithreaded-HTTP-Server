@@ -12,7 +12,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_subdirectory(src/server)
 add_subdirectory(src/parser)
 
-
 add_executable(Server main.cpp)
 
 target_link_libraries(Server 
