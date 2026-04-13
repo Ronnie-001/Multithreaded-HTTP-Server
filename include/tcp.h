@@ -1,9 +1,9 @@
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef TCP_H
+#define TCP_H
 
 #include <netdb.h>
 
-class Server {
+class TcpListener {
 
 private:
     int _status;
@@ -23,10 +23,10 @@ private:
 
 public:
     // Constructor
-    Server();
+    TcpListener();
     
     // Destructor
-    ~Server();
+    ~TcpListener();
     
     /*
      * Gets a list of server addresses to connect on using getaddrinfo() and 
@@ -44,4 +44,4 @@ public:
     void* getAddressFamily(const sockaddr_storage* recieved_connection);
 }; 
 
-#endif // ! SERVER_H
+#endif // ! TCP_H

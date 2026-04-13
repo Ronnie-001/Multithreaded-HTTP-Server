@@ -7,12 +7,12 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "server.h"
+#include "tcp.h"
 
 #define MY_PORT "3490"
 #define BACKLOG 10
 
-Server::Server() : _server_running(false) 
+TcpListener::TcpListener() : _server_running(false) 
 {
     // Look for IPv4 or IPv6.
     _hints.ai_family = PF_UNSPEC;
@@ -24,12 +24,12 @@ Server::Server() : _server_running(false)
     _status = getaddrinfo(NULL, MY_PORT, &_hints, &_servinfo);
 }
 
-Server::~Server()
+TcpListener::~TcpListener()
 {
     close(_conn_fd);
 }
 
-void Server::findServerAddress()
+void TcpListener::findServerAddress()
 {
 
     if (_status != 0) {
@@ -68,7 +68,7 @@ void Server::findServerAddress()
     }
 }
 
-void Server::listenForConnections() 
+void TcpListener::listenForConnections() 
 {
     // Set the queue size through BACKLOG.
     _listen_fd = listen(_sock_fd, BACKLOG);
@@ -105,7 +105,7 @@ void Server::listenForConnections()
     }        
 }
 
-void* Server::getAddressFamily(const sockaddr_storage* recieved_connection)
+void* TcpListener::getAddressFamily(const sockaddr_storage* recieved_connection)
 {
     // Check for IPv4.
     if (recieved_connection->ss_family == AF_INET) {
