@@ -9,7 +9,7 @@ struct Request
 {
     // Start line
     std::string method;
-    std::string resource;
+    std::string resourcePath;
     std::string version; 
 
     // request headers

@@ -26,7 +26,15 @@ public:
      * and appending it to _request.
     */
     void appendData();
-
+    
+    // Used for extracting the method used, i.e. GET, POST, PUT, etc.
+    std::string extractMethod(); 
+    
+    // Used for extracting the path to the resource.
+    std::string extractResourcePath();
+    
+    // Used for extracting the HTTP version being used.
+    std::string extractVersion();
 };
 
 #endif // ! PARSER_H
