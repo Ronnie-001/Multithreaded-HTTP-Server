@@ -14,7 +14,6 @@
 #define BACKLOG 10
 #define BUFFER_SIZE 1024
 
-
 TcpListener::TcpListener() : _server_running(false) 
 {
     // Look for IPv4 or IPv6.
@@ -103,17 +102,22 @@ void TcpListener::listenForConnections()
 
         // buffer to read the data into.
         char buffer[BUFFER_SIZE];
+        std::string data;
         
-        int nread = recv(_conn_fd, buffer, BUFFER_SIZE, 0);
+        // TODO: Spin up a worker thread from the thread pool here. 
+
+        int nread;
+        while ((nread = recv(_conn_fd, buffer, BUFFER_SIZE, 0)) > 0) {
+            data.append(buffer, nread);             
+
+            std::cout << "data recieved: " << '\n';
+            std::cout << data;
+        }
+
         // Move on from the failed request.
         if (nread == -1) {
             continue;
         } 
-
-        buffer[nread] = '\0';
-        
-        std::cout << "Message recieved: " << "\n";
-        std::cout << buffer;
     }        
 }
 
