@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <cstdio>
 #include <cstdlib>
+#include <memory>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -9,6 +10,7 @@
 #include <iostream>
 
 #include "tcp.h"
+#include "parser.h"
 
 #define MY_PORT "3490"
 #define BACKLOG 10
@@ -112,6 +114,11 @@ void TcpListener::listenForConnections()
 
             std::cout << "data recieved: " << '\n';
             std::cout << data;
+
+            std::cout << "START LINE:" << '\n';
+            
+            auto parser = std::make_unique<HttpParser>(_conn_fd, data);
+            std::cout << parser->extractStartLine() << '\n';
         }
 
         // Move on from the failed request.

@@ -15,5 +15,6 @@ add_subdirectory(src/parser)
 add_executable(Server main.cpp)
 
 target_link_libraries(Server 
-    PRIVATE cerberus_server
+    PRIVATE cerberus_server 
+            cerberus_parser
 )

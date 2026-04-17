@@ -20,7 +20,7 @@ private:
     Request _parsed_request;
 public:
     // Constructor 
-    HttpParser(int fd);
+    HttpParser(int fd, const std::string request);
 
     // Destructor
     ~HttpParser();
