@@ -1,6 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <map>
 #include <string>
 #include "request.h"
 
@@ -21,6 +22,9 @@ private:
     std::string _method;
     std::string _resource_path;
     std::string _version;
+
+    // Headers 
+    std::map<std::string, std::string> _headers;
 
     // The final request to be constructed.
     Request _parsed_request;
