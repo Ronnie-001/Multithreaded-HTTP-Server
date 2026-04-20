@@ -119,9 +119,7 @@ void TcpListener::listenForConnections()
             parser->extractStartLine();
             parser->parseStartLine();
 
-            std::cout << "METHOD: " << parser->getMethod() << '\n';
-            std::cout << "RESOUCE PATH: " << parser->getResourcePath() << '\n';
-            std::cout << "HTTP VERSION: " << parser->getVersion() << '\n';
+            parser->parseHeaders();
         }
 
         // Move on from the failed request.

@@ -1,7 +1,9 @@
-#include "parser.h"
 #include <sstream>
 #include <string>
 #include <vector>
+#include <iostream>
+
+#include "parser.h"
 
 HttpParser::HttpParser(int fd, const std::string request) : _complete(false), _conn_fd(fd), _request(request)
 {}
@@ -43,4 +45,40 @@ void HttpParser::parseStartLine()
     _method = v[0];
     _resource_path = v[1];
     _version = v[2];
+}
+
+void HttpParser::parseHeaders() 
+{
+    std::string::size_type start = _request.find("\r\n");
+    std::string::size_type end = _request.find("\r\n\r\n");
+
+    // Take everything between the start line and the space.
+    std::string headers = _request.substr(start, end);
+    
+    std::size_t parse_start = 0;
+    std::size_t parse_end = headers.find("\r\n");
+    
+    // Iterate through manually until no CLRF
+    while (parse_end != std::string::npos) {
+        std::string header = headers.substr(parse_start, parse_end - parse_start);  
+
+        // Split the header based on ": ", then add to std::map _headers
+        std::stringstream ss(header);
+        std::vector<std::string> v;
+        std::string store;
+
+        while (std::getline(ss, store, ':')) {
+            v.push_back(store);
+        }
+        
+        // Remove leading space from the value
+        v[1] = v[1].find(' ') != std::string::npos ?  v[1].substr(1, v[1].size()) : v[1];
+
+        std::cout << "Key: " << v[0] << '\n';
+        std::cout << "Value: " << v[1] << '\n';
+
+        std::cout << '\n';
+        
+        _headers.insert({v[0], v[1]});
+    }
 }
