@@ -60,7 +60,7 @@ public:
     // Used for getting the headers of the HTTP request
     void parseHeaders();
     
-    // Used for getting the message body from the HTTP request.
+    // Used for getting the JSON message body from the HTTP request.
     void extractMessageBody();
 
     // Function used to create the pasersed HTTP request.
