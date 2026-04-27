@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "parser.h"
+#include  "simdjson.h"
 
 HttpParser::HttpParser(int fd, const std::string request) : _complete(false), _conn_fd(fd), _request(request)
 {}
@@ -102,6 +103,11 @@ void HttpParser::parseHeaders()
 } 
 
 void HttpParser::extractMessageBody() 
-{
-    auto number_of_bytes = _headers.at("Content-Length");
+{    
+    // Create a thread local parser
+    simdjson::ondemand::document message_body = simdjson::ondemand::parser::get_parser().iterate(_extracted_headers);
+
 }
+
+
+
