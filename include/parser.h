@@ -1,6 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <string_view>
 #include <unordered_map>
 #include <string>
 #include "request.h"
@@ -18,17 +19,20 @@ private:
     std::string _request;
 
     // the start line
-    std::string _start_line;
+    std::string _extracted_start_line;
     std::string _method;
     std::string _resource_path;
     std::string _version;
     
     std::string _extracted_headers;
+    std::string _extracted_message_body;
     // Headers 
-    std::unordered_map<std::string, std::string> _headers;
+    std::unordered_map<std::string_view, std::string_view> _headers;
+    std::unordered_map<std::string_view, std::string_view> _message_body;
 
     // The final request to be constructed.
     Request _parsed_request;
+
 public:
     // Constructor 
     HttpParser(int fd, const std::string request);
@@ -59,9 +63,11 @@ public:
     void extractHeaders();
     // Used for getting the headers of the HTTP request
     void parseHeaders();
-    
+        
     // Used for getting the JSON message body from the HTTP request.
     void extractMessageBody();
+    // Used for parsing each individual field from the extracted message body 
+    void parseMessageBody();
 
     // Function used to create the pasersed HTTP request.
     Request constructRequest();

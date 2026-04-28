@@ -1,5 +1,6 @@
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "parser.h"
@@ -27,12 +28,12 @@ void HttpParser:: extractStartLine()
     std::string::size_type first_clrf = _request.find("\r\n");
     std::string start_line = _request.substr(0, first_clrf);  
     
-    _start_line = start_line;
+    _extracted_start_line = start_line;
 }
 
 void HttpParser::parseStartLine()
 {
-    std::stringstream ss(_start_line);
+    std::stringstream ss(_extracted_start_line);
     // Use a vector to store each part of the start line.
     std::vector<std::string> v;
     std::string store;
@@ -103,11 +104,33 @@ void HttpParser::parseHeaders()
 } 
 
 void HttpParser::extractMessageBody() 
-{    
-    // Create a thread local parser
-    simdjson::ondemand::document message_body = simdjson::ondemand::parser::get_parser().iterate(_extracted_headers);
+{
+    std::string::size_type start = _request.find("\r\n\r\n") + 4;
+    std::string::size_type end = _request.size() - start;
+    
+    _extracted_message_body = _request.substr(start, end);
 
+    std::cout << "EXTRACTED MESSAGE BODY: " << '\n';
+    std::cout << "[" << _extracted_message_body << "]" << '\n';
 }
 
+void HttpParser::parseMessageBody() 
+{    
+    // Create a thread local parser
+    simdjson::ondemand::document message_body = simdjson::ondemand::parser::get_parser().iterate(_extracted_message_body);
+    simdjson::ondemand::object object = message_body.get_object();
+    
+    for (auto field : object) {
+        std::cout << "-------------------------" << '\n';
 
+        // Get the key and the value
+        auto key = field->unescaped_key();
+        auto value = field->value();
 
+        std::cout << "Key: " << key << '\n';
+        std::cout << "Value: " << value << '\n';
+
+        // Add to the map
+        // _message_body.insert({key, static_cast<std::string_view>(value)});
+    } 
+}

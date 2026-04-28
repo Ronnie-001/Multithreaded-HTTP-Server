@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <cstdio>
 #include <cstdlib>
+#include <execution>
 #include <memory>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -113,15 +114,17 @@ void TcpListener::listenForConnections()
             data.append(buffer, nread);             
 
             std::cout << "data recieved: " << '\n';
-            std::cout << data;
+            std::cout << data << '\n';
+            std::cout << "--------------------------------" << '\n';
 
             auto parser = std::make_unique<HttpParser>(_conn_fd, data);
             parser->extractStartLine();
             parser->parseStartLine();
 
             parser->parseHeaders();
-
-            std::cout << "----------------NEXT PIECE OF DATA---------------------" << '\n';
+            
+            parser->extractMessageBody();
+            parser->parseMessageBody();
         }
 
         // Move on from the failed request.
