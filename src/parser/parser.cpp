@@ -177,19 +177,6 @@ Request HttpParser::constructRequest()
     req.version = _version;
 
     req.headers = _headers;
-
-//     // Create a lambda eor printing out the headers
-//    auto print_key_values = [](const auto& key, const auto& value) {
-//        std::cout << "HEADER: " << key << '\n';
-//        std::cout << "VALUE: " << value << '\n';
-//    };
-//    
-//    std::cout << "------------TESTING------------------" << '\n';
-//
-//    for (const auto& [key, value] : _headers) {
-//        print_key_values(key, value);
-//    }
-
     req.body = _message_body;
 
     return req;
