@@ -1,7 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include <string_view>
 #include <unordered_map>
 #include <string>
 #include "request.h"
@@ -25,11 +24,11 @@ private:
    
     // Headers
     std::string _extracted_headers;
-    std::unordered_map<std::string_view, std::string_view> _headers;
+    std::unordered_map<std::string, std::string> _headers;
 
     // Message body
     std::string _extracted_message_body;
-    std::unordered_map<std::string_view, std::string_view> _message_body;
+    std::unordered_map<std::string, std::string> _message_body;
 
     // The final request to be constructed.
     Request _parsed_request;
@@ -46,7 +45,7 @@ public:
     std::string getMethod() const;
     std::string getResourcePath() const;
     std::string getVersion() const;
-
+   
     /*
      * Used for appending data from the recv() system call
      * and appending it to _request.
