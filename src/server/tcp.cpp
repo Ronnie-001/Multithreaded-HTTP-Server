@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <cstdio>
 #include <cstdlib>
+#include <immintrin.h>
 #include <memory>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -36,7 +37,6 @@ cerberus::TcpListener::~TcpListener()
 
 void cerberus::TcpListener::findServerAddress()
 {
-
     if (_status != 0) {
         fprintf(stderr, "[ERROR] getaddrinfo: %s\n", gai_strerror(_status));
         exit(EXIT_FAILURE);
@@ -44,7 +44,6 @@ void cerberus::TcpListener::findServerAddress()
     
     // Try each found server address until successful bind().
     for (_ptr = _servinfo; _ptr != NULL; _ptr = _ptr->ai_next) {
-
         _sock_fd = socket(_ptr->ai_family, _ptr->ai_socktype, _ptr->ai_protocol);
 
         if (_sock_fd == -1) {
@@ -86,8 +85,39 @@ void cerberus::TcpListener::listenForConnections()
     std::cout << "[SERVER]: listening for incoming connections..." << "\n";
 
     _server_running = true;
+    createEpollInstance();
+
+    // Register interest in the _sock_fd file descriptor
+    _ev.events = EPOLLIN;
+    _ev.data.fd = _sock_fd;
+
+    int register_interest = epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, _sock_fd, &_ev); 
+    if (register_interest == -1) {
+        perror("[ERROR] Error registering interest with file descriptor: ");
+        std::cout << _sock_fd;
+        exit(EXIT_FAILURE);
+    } 
 
     while (_server_running) {
+        // Grab the number of READY file descriptors
+        int nfds = epoll_wait(_epoll_fd, &_ev, MAX_EVENTS, -1);
+        if (nfds == -1) {
+            perror("[ERROR] Erorr when waiting for available file descriptors.");
+            exit(EXIT_FAILURE);
+        }
+
+        for (int i = 0; i < nfds; ++i) {
+            int fd = _events[i].data.fd;
+
+            // Check if this is an NEW connection
+            if (fd == _sock_fd) {
+                // If so accept the connection, and create a new parser for it
+
+            } else {
+
+            }
+        }
+
         socklen_t connection_size = sizeof(_received_connection);
         _conn_fd = accept(_sock_fd, (sockaddr*)&_received_connection, &connection_size);
         
@@ -95,7 +125,7 @@ void cerberus::TcpListener::listenForConnections()
             std::cout << "[LOGS] accept: failure extracting connection request. File descriptor: " << _conn_fd;
             continue;
         }
-
+        
         // Read in the incoming request data.
         char ip_address[INET6_ADDRSTRLEN];
         socklen_t request_size = sizeof(ip_address);
@@ -137,6 +167,8 @@ void cerberus::TcpListener::listenForConnections()
             continue;
         } 
     }        
+    
+    _server_running = false;
 }
 
 void* cerberus::TcpListener::getAddressFamily(const sockaddr_storage* recieved_connection)
@@ -147,4 +179,13 @@ void* cerberus::TcpListener::getAddressFamily(const sockaddr_storage* recieved_c
     }
     
     return &(((struct sockaddr_in6*)recieved_connection))->sin6_addr;
+}
+
+void cerberus::TcpListener::createEpollInstance() 
+{
+    _epoll_fd = epoll_create1(0);
+    if (_epoll_fd == -1) {
+        perror("[ERROR] Error creating an epoll instance."); 
+        exit(EXIT_FAILURE);
+    }
 }

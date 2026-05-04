@@ -1,7 +1,13 @@
 #ifndef TCP_H
 #define TCP_H
 
+#include "parser.h"
+#include "request.h"
 #include <netdb.h>
+#include <sys/epoll.h>
+#include <unordered_map>
+
+#define MAX_EVENTS 15
 
 namespace cerberus 
 {
@@ -22,6 +28,18 @@ namespace cerberus
 
         bool _server_running;
         struct sockaddr_storage _received_connection; 
+
+        // epoll
+        int _epoll_fd;
+        struct epoll_event _ev; // the current events
+        struct epoll_event _events[MAX_EVENTS]; // holds all events
+                                                //
+        /*
+         * Map used to store each HTTP parser with each TCP connection.
+         * This way, when handling things such as packet switching, we can append
+         * incoming data with thier correct parser.
+         */
+        std::unordered_map<int, cerberus::HttpParser*> parsers;
 
     public:
         // Constructor
@@ -47,6 +65,10 @@ namespace cerberus
          * Returns the internet socket address of the received connection.
         */
         void* getAddressFamily(const sockaddr_storage* recieved_connection);
+        
+        // Used to create a new epoll instace in kernel space.
+        void createEpollInstance();
+        
     }; 
 }
 
