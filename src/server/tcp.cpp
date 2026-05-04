@@ -17,7 +17,7 @@
 #define BACKLOG 10
 #define BUFFER_SIZE 1024
 
-TcpListener::TcpListener() : _server_running(false) 
+cerberus::TcpListener::TcpListener() : _server_running(false) 
 {
     // Look for IPv4 or IPv6.
     _hints.ai_family = PF_UNSPEC;
@@ -29,12 +29,12 @@ TcpListener::TcpListener() : _server_running(false)
     _status = getaddrinfo(NULL, MY_PORT, &_hints, &_servinfo);
 }
 
-TcpListener::~TcpListener()
+cerberus::TcpListener::~TcpListener()
 {
     close(_conn_fd);
 }
 
-void TcpListener::findServerAddress()
+void cerberus::TcpListener::findServerAddress()
 {
 
     if (_status != 0) {
@@ -73,7 +73,7 @@ void TcpListener::findServerAddress()
     }
 }
 
-void TcpListener::listenForConnections() 
+void cerberus::TcpListener::listenForConnections() 
 {
     // Set the queue size through BACKLOG.
     _listen_fd = listen(_sock_fd, BACKLOG);
@@ -119,7 +119,7 @@ void TcpListener::listenForConnections()
             std::cout << "--------------------------------" << '\n';
             
             // Create a parser for each incoming request
-            auto parser = std::make_unique<HttpParser>(_conn_fd, data);
+            auto parser = std::make_unique<cerberus::HttpParser>(_conn_fd, data);
 
             parser->extractStartLine();
             parser->parseStartLine();
@@ -127,7 +127,7 @@ void TcpListener::listenForConnections()
             parser->extractHeaders();
             parser->parseHeaders();
             
-            Request req = parser->constructRequest();
+            cerberus::Request req = parser->constructRequest();
 
             std::cout << req;
         }
@@ -139,7 +139,7 @@ void TcpListener::listenForConnections()
     }        
 }
 
-void* TcpListener::getAddressFamily(const sockaddr_storage* recieved_connection)
+void* cerberus::TcpListener::getAddressFamily(const sockaddr_storage* recieved_connection)
 {
     // Check for IPv4.
     if (recieved_connection->ss_family == AF_INET) {

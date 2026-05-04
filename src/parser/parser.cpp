@@ -8,23 +8,23 @@
 #include "request.h"
 #include "simdjson.h"
 
-HttpParser::HttpParser(int fd, const std::string request) : _complete(false), _conn_fd(fd), _request(request)
+cerberus::HttpParser::HttpParser(int fd, const std::string request) : _complete(false), _conn_fd(fd), _request(request)
 {}
 
-HttpParser::~HttpParser() { /*Nothing here!!!*/ } 
+cerberus::HttpParser::~HttpParser() { /*Nothing here!!!*/ } 
 
-bool HttpParser::isRequestComplete() const { return _complete; }
+bool cerberus::HttpParser::isRequestComplete() const { return _complete; }
 
-std::string HttpParser::getMethod() const { return _method; }
-std::string HttpParser::getResourcePath() const { return _resource_path; }
-std::string HttpParser::getVersion() const { return _version; }
+std::string cerberus::HttpParser::getMethod() const { return _method; }
+std::string cerberus::HttpParser::getResourcePath() const { return _resource_path; }
+std::string cerberus::HttpParser::getVersion() const { return _version; }
 
-void HttpParser::appendData(const char* buffer, int bytes)
+void cerberus::HttpParser::appendData(const char* buffer, int bytes)
 {
     _request.append(buffer, bytes);
 }
 
-void HttpParser:: extractStartLine()
+void cerberus::HttpParser:: extractStartLine()
 {
     // Look for first instance of CRLF
     std::string::size_type first_clrf = _request.find("\r\n");
@@ -33,7 +33,7 @@ void HttpParser:: extractStartLine()
     _extracted_start_line = start_line;
 }
 
-void HttpParser::parseStartLine()
+void cerberus::HttpParser::parseStartLine()
 {
     std::stringstream ss(_extracted_start_line);
     // Use a vector to store each part of the start line.
@@ -50,7 +50,7 @@ void HttpParser::parseStartLine()
     _version = v[2];
 }
 
-void HttpParser::extractHeaders()
+void cerberus::HttpParser::extractHeaders()
 {
     std::string::size_type start = _request.find("\r\n");
     std::string::size_type end = _request.find("\r\n\r\n");
@@ -59,7 +59,7 @@ void HttpParser::extractHeaders()
     _extracted_headers = _request.substr(start + 2, end - (start + 2));
 }
 
-void HttpParser::parseHeaders() 
+void cerberus::HttpParser::parseHeaders() 
 {
     std::size_t parse_start = 0;
     std::size_t parse_end = _extracted_headers.find("\r\n");
@@ -109,7 +109,7 @@ void HttpParser::parseHeaders()
     }
 } 
 
-void HttpParser::extractMessageBody() 
+void cerberus::HttpParser::extractMessageBody() 
 {
     std::string::size_type start = _request.find("\r\n\r\n") + 4;
     std::string::size_type end = _request.size() - start;
@@ -117,7 +117,7 @@ void HttpParser::extractMessageBody()
     _extracted_message_body = _request.substr(start, end);
 }
 
-void HttpParser::parseMessageBody() 
+void cerberus::HttpParser::parseMessageBody() 
 {    
     // Create a thread local parser
     simdjson::ondemand::document message_body = simdjson::ondemand::parser::get_parser().iterate(_extracted_message_body);
@@ -136,7 +136,7 @@ void HttpParser::parseMessageBody()
     } 
 }
 
-std::ostream& operator<<(std::ostream& out, const Request& request) 
+std::ostream& operator<<(std::ostream& out, const cerberus::Request& request) 
 {
     out << "------------START LINE--------" << '\n';
     out << "METHOD: " << request.method << '\n';
@@ -167,7 +167,7 @@ std::ostream& operator<<(std::ostream& out, const Request& request)
     return out;
 }
 
-Request HttpParser::constructRequest() 
+cerberus::Request cerberus::HttpParser::constructRequest() 
 {
     Request req;
 
