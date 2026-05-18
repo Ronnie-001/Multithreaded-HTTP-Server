@@ -23,16 +23,16 @@ bool cerberus::HttpParser::isRequestComplete()
     int crlf = _request.find("\r\n\r\n");
         
     // No message body
-    if (header == -1 && crlf != std::string::npos) {
+    if (header == std::string::npos && crlf != std::string::npos) {
         _complete = true;
     } 
 
-    if (header != -1 && crlf != std::string::npos) {
+    if (header != std::string::npos && crlf != std::string::npos) {
         // grab the substring of the request, starting from \r\n\r\n,
         // then compare this to the content length.
-
         std::string message_body = _request.substr(crlf + 4);
 
+        // Assuming that there is only one Content-Length header
         std::string from_content_length = _request.substr(header);
         std::string number_of_bytes_str = from_content_length.substr(16, from_content_length.find("\r\n"));       
 
@@ -130,7 +130,7 @@ void cerberus::HttpParser::parseHeaders()
 
         // Add to map
         _headers.insert({v[0], value});
-
+        
         parse_start = parse_end + 2;
         parse_end = _extracted_headers.find("\r\n", parse_start);
     }
@@ -138,7 +138,6 @@ void cerberus::HttpParser::parseHeaders()
     if (_headers.contains("Content-Length")) {
         extractMessageBody();
         parseMessageBody();
-        std::cout << "[PARSER] MESSAGE BODY PARSED" << '\n';
     }
 } 
 
@@ -178,7 +177,7 @@ std::ostream& operator<<(std::ostream& out, const cerberus::Request& request)
     
     // Create a lambda for printing out the headers
     auto print_key_values = [](const auto& key, const auto& value, std::ostream& out) {
-        out << "HEADER: " << key << '\n';
+        out << "HEADER/KEY: " << key << '\n';
         out << "VALUE: " << value << '\n';
     };
 

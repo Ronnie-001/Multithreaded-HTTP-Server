@@ -163,11 +163,13 @@ void cerberus::TcpListener::listenForConnections()
                 std::string data = readData(fd);
                 parser->appendData(data); 
 
-                std::cout << "-------------[TESTING]----------------" << '\n';
-                cerberus::string::printRawCharacters(data);
-                std::cout << "-------------[TESTING]----------------" << '\n';
+//                std::cout << "-------------[TESTING]----------------" << '\n';
+//                cerberus::string::printRawCharacters(data);
+//                std::cout << "-------------[TESTING]----------------" << '\n';
 
                 if (parser->isRequestComplete()) {
+
+                    parseHttpRequest(parser);
                     cerberus::Request req = parser->constructRequest();
                     std::cout << req;
 
@@ -251,11 +253,10 @@ std::string cerberus::TcpListener::readData(const int fd)
 
         data.append(buffer, nread);             
 
-        std::cout << "data recieved: " << '\n';
-        std::cout << "-------------DATA---------------" << '\n';
-        std::cout << data;
-        std::cout << "--------------------------------" << '\n';
-
+//        std::cout << "data recieved: " << '\n';
+//        std::cout << "-------------DATA---------------" << '\n';
+//        std::cout << data;
+//        std::cout << "--------------------------------" << '\n';
     }
 
     return data;
@@ -272,10 +273,10 @@ void cerberus::TcpListener::parseHttpRequest(cerberus::HttpParser* parser)
 
 void cerberus::TcpListener::sendResponse(const int& fd) 
 {
-    std::string message = "HTTP/1.1 200 OK\r\nContent-Length: 30\r\nConnection: close\r\n\r\n[SERVER] This is the response!";
-    std::string message2 = "HTTP/1.1 200 OK\r\nContent-Length: 30\r\n\r\n[SERVER] This is the response!";
+    // std::string message = "HTTP/1.1 200 OK\r\nContent-Length: 30\r\nConnection: close\r\n\r\n[SERVER] This is the response!";
+    std::string message = "HTTP/1.1 200 OK\r\nContent-Length: 30\r\n\r\n[SERVER] This is the response!";
 
-    std::size_t bytes_sent = send(fd, message2.data(), message2.size(), 0);
+    std::size_t bytes_sent = send(fd, message.data(), message.size(), 0);
 
     if (bytes_sent == -1) {
         std::cerr << "[ERROR] Error sending response back to the client"; 
